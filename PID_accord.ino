@@ -10,7 +10,7 @@ Augementer l'angle diminue la fréquence.
 Servo motor;
 
 int capteurPin = A1;
-int servoPin = 3;
+int servoPin = 45;
 float pTerm;
 float iTerm;
 float dTerm;
@@ -80,7 +80,7 @@ void setup() {
   
   pinMode(servoPin, OUTPUT);
   pinMode(capteurPin, INPUT);
-  motor.attach(3);
+  motor.attach(45);
   Serial.begin(9600);
   
   pTerm = 0;
