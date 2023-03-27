@@ -9,7 +9,7 @@ Augementer l'angle diminue la fréquence.
 
 Servo motor;
 
-int capteurPin = A1;
+int capteurPin = A8;
 int servoPin = 45;
 float pTerm;
 float iTerm;
