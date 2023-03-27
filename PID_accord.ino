@@ -85,11 +85,9 @@ void setup() {
   
   pTerm = 0;
   iTerm = 0;
-  dTerm = 0;
 
   pWeight = 1.5; //4
   iWeight = 0; //0.005
-  dWeight = 0; // 10
   errorWeight = -1;
 
   targetFreq = 105;
@@ -100,6 +98,7 @@ void setup() {
   curFreq = getCurFreq();
   prevFreq = curFreq;
   prevvFreq = curFreq;
+  aveFreq = curFreq;
   curTimer = 0;
   prevTimer = 0;
 }
@@ -110,42 +109,45 @@ void loop() {
   Interface();
   LCDfunction();
   Serial.println(frequence);
-  
-  // get input and smoothing
+ 
+  aveFreq = getFreqMoyenne(aveFreq);
+  pTerm = getPterm();
+  iTerm += pTerm;
+  error = calculateError();
+  curAngle = getCurAngle();
+  motor.write(curAngle);
+  // Serial.println("Current angle : " + String(curAngle));
+  // Serial.println("Current error : " + String(error));
+}
+
+long getPterm() {
+  pTerm = targetFreq - aveFreq;
+  return pTerm;
+
+long getFreqMoyenne() {
   prevFreq = curFreq;
   prevvFreq = prevFreq;
   curFreq = getCurFreq();
-  // Serial.println(curFreq);
-  prevTimer = curTimer;
-  curTimer = millis();
-  float deltaT = curTimer - prevTimer;
   prevAveFreq = aveFreq;
-  aveFreq = (curFreq + prevFreq + prevvFreq)/3; // replace with weighted sum ?
-
-  // term calculating
-  pTerm = targetFreq - aveFreq;
-  dTerm = (aveFreq - prevAveFreq) / deltaT;
-  iTerm += pTerm;
-
-  // error calc
-  error = ((pTerm * pWeight) + (iTerm * iWeight) + (dTerm * dWeight)) * errorWeight;
+  ave_Freq = (curFreq + prevFreq + prevvFreq)/3;
+  return ave_Freq;
+}
+  
+long calculateError() {
+  error = ((pTerm * pWeight) + (iTerm * iWeight)) * errorWeight;
   if ((error > -zeroError) and (error < zeroError)) {
     error = 0;
   }
+}
 
-  Serial.println("Pterm : " + String(pTerm));
-  Serial.println("Error precalc : " + String(error));
+long getCurAngle() {
   curAngle += error;
-  Serial.println("CurAngle calc : " + String(curAngle));
   if (curAngle > maxAngle) {
     curAngle = maxAngle;
   } else if (curAngle < minAngle) {
     curAngle = minAngle;
   }
-  // set angle
-  motor.write(curAngle);
-  Serial.println("Current angle : " + String(curAngle));
-  // Serial.println("Current error : " + String(error));
+  return curAngle;
 }
 
 long getCurFreq() {
